@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nominet - Gestión Empresarial</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --verde:  #16A34A;
+            --azul:   #1A2E40;
+            --oscuro: #1E1E1E;
+            --gris:   #202532;
+            --claro:  #F3F4F6;
+        }
+        body { font-family: 'Poppins', sans-serif; background: white; color: var(--oscuro); }
+
+        /* ── NAVBAR ── */
+        nav {
+            background: var(--azul);
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 2.5rem; height: 70px;
+            box-shadow: 0 4px 12px rgba(0,0,0,.3);
+            position: sticky; top: 0; z-index: 100;
+        }
+        .nav-logo { font-size: 1.6rem; font-weight: 800; color: var(--claro); letter-spacing: 1px; }
+        .nav-logo span { color: var(--verde); }
+        .nav-links { display: flex; gap: 1.5rem; list-style: none; align-items: center; }
+        .nav-links a {
+            color: rgba(255,255,255,.8); text-decoration: none;
+            font-size: .92rem; font-weight: 500;
+            transition: color .2s;
+        }
+        .nav-links a:hover { color: white; }
+        .nav-links .btn-registrar {
+            color: white; border: 1.5px solid rgba(255,255,255,.4);
+            padding: .4rem 1.1rem; border-radius: 7px;
+            transition: background .2s, border-color .2s;
+        }
+        .nav-links .btn-registrar:hover { background: rgba(255,255,255,.1); border-color: white; }
+        .nav-links .btn-ingresar {
+            background: var(--verde); color: white; font-weight: 700;
+            padding: .45rem 1.2rem; border-radius: 7px;
+            transition: background .2s;
+        }
+        .nav-links .btn-ingresar:hover { background: #15803d; }
+
+        /* ── HERO ── */
+        .hero {
+            background: linear-gradient(135deg, var(--verde) 0%, #0f7a38 100%);
+            padding: 5rem 2rem 4rem;
+            text-align: center; position: relative; overflow: hidden;
+        }
+        .hero::before {
+            content: '';
+            position: absolute; inset: 0;
+            background: radial-gradient(ellipse at 70% 30%, rgba(255,255,255,.12) 0%, transparent 60%);
+            pointer-events: none;
+        }
+        /* Círculos decorativos */
+        .hero::after {
+            content: '';
+            position: absolute;
+            width: 500px; height: 500px;
+            background: rgba(255,255,255,.04);
+            border-radius: 50%;
+            bottom: -200px; right: -100px;
+            pointer-events: none;
+        }
+        .hero-badge {
+            display: inline-block;
+            background: rgba(255,255,255,.15);
+            color: white; font-size: .78rem; font-weight: 600;
+            letter-spacing: 2px; text-transform: uppercase;
+            padding: .35rem 1rem; border-radius: 20px;
+            margin-bottom: 1.5rem;
+            border: 1px solid rgba(255,255,255,.25);
+        }
+        .hero h1 {
+            font-size: clamp(1.8rem, 4vw, 2.8rem);
+            font-weight: 800; color: white;
+            max-width: 680px; margin: 0 auto 1.2rem;
+            line-height: 1.2;
+        }
+        .hero h1 span { color: var(--azul); }
+        .hero p {
+            font-size: clamp(.95rem, 2vw, 1.15rem);
+            color: rgba(255,255,255,.88); margin-bottom: 2.5rem;
+            max-width: 520px; margin-left: auto; margin-right: auto;
+        }
+        .hero-btns { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+        .btn-cta-primary {
+            background: var(--azul); color: white;
+            font-family: 'Poppins', sans-serif; font-weight: 700;
+            font-size: .95rem; letter-spacing: .5px;
+            padding: .9rem 2.2rem; border-radius: 8px;
+            text-decoration: none; border: none; cursor: pointer;
+            transition: background .2s, transform .15s;
+            box-shadow: 0 4px 15px rgba(0,0,0,.25);
+        }
+        .btn-cta-primary:hover { background: #111827; transform: translateY(-2px); }
+        .btn-cta-secondary {
+            background: transparent; color: white;
+            font-family: 'Poppins', sans-serif; font-weight: 600;
+            font-size: .95rem; padding: .9rem 2.2rem; border-radius: 8px;
+            text-decoration: none; border: 2px solid rgba(255,255,255,.5);
+            transition: border-color .2s, background .2s, transform .15s;
+        }
+        .btn-cta-secondary:hover {
+            border-color: white; background: rgba(255,255,255,.1);
+            transform: translateY(-2px);
+        }
+
+        /* ── STATS ── */
+        .stats {
+            background: var(--azul);
+            display: flex; justify-content: center; gap: 0;
+            flex-wrap: wrap;
+        }
+        .stat-item {
+            text-align: center; padding: 1.8rem 3rem;
+            border-right: 1px solid rgba(255,255,255,.1);
+        }
+        .stat-item:last-child { border-right: none; }
+        .stat-num { font-size: 2rem; font-weight: 800; color: var(--verde); }
+        .stat-lbl { font-size: .8rem; color: rgba(255,255,255,.6); font-weight: 500; margin-top: .2rem; }
+
+        /* ── SERVICIOS ── */
+        .servicios-section {
+            padding: 5rem 2rem;
+            max-width: 1100px; margin: 0 auto;
+        }
+        .section-label {
+            text-align: center; font-size: .78rem; font-weight: 700;
+            letter-spacing: 3px; text-transform: uppercase;
+            color: var(--verde); margin-bottom: .8rem;
+        }
+        .servicios-section h2 {
+            text-align: center;
+            font-size: clamp(1.4rem, 2.5vw, 1.9rem);
+            font-weight: 800; color: var(--azul); margin-bottom: 3rem;
+        }
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+        }
+        @media (max-width: 900px) { .cards-grid { grid-template-columns: repeat(2,1fr); } }
+        @media (max-width: 580px) { .cards-grid { grid-template-columns: 1fr; } }
+
+        .card {
+            background: white;
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: 0 2px 20px rgba(0,0,0,.08);
+            border: 1px solid #f0f0f0;
+            transition: transform .2s, box-shadow .2s;
+        }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,0,0,.12); }
+        .card-icon-box {
+            background: linear-gradient(135deg, var(--verde), #0f7a38);
+            height: 130px; display: flex; align-items: center; justify-content: center;
+        }
+        .card-icon { font-size: 3rem; }
+        .card-body { padding: 1.5rem; }
+        .card-label {
+            font-size: 1rem; font-weight: 700; color: var(--azul);
+            margin-bottom: .5rem;
+        }
+        .card-desc { font-size: .88rem; color: #6b7280; line-height: 1.5; }
+
+        /* ── CTA FINAL ── */
+        .cta-section {
+            background: linear-gradient(135deg, var(--azul) 0%, #0f1e2d 100%);
+            text-align: center; padding: 5rem 2rem;
+        }
+        .cta-section h2 {
+            font-size: clamp(1.4rem, 3vw, 2rem);
+            font-weight: 800; color: white; margin-bottom: 1rem;
+        }
+        .cta-section p {
+            color: rgba(255,255,255,.7); font-size: 1rem;
+            margin-bottom: 2rem; max-width: 480px; margin-left: auto; margin-right: auto;
+        }
+
+        /* ── FOOTER ── */
+        footer {
+            background: #0d1b2a; color: rgba(255,255,255,.5);
+            text-align: center; padding: 1.5rem;
+            font-size: .82rem;
+        }
+        footer span { color: var(--verde); font-weight: 600; }
+    </style>
+</head>
+<body>
+
+<!-- NAVBAR: solo Inicio, Registrarse, Ingresar -->
+<nav>
+    <span class="nav-logo">Nomi<span>net</span></span>
+    <ul class="nav-links">
+        <li><a th:href="@{/}">Inicio</a></li>
+        <li><a th:href="@{/registro}" class="btn-registrar">Registrarse</a></li>
+        <li><a th:href="@{/login}" class="btn-ingresar">Ingresar</a></li>
+    </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+    <div class="hero-badge">✦ Plataforma de gestión empresarial</div>
+    <h1>Gestiona tu empresa y <span>nómina</span> sin complicaciones</h1>
+    <p>Registra empleados, genera nóminas y lleva el control de tu negocio desde un solo lugar.</p>
+    <div class="hero-btns">
+        <a th:href="@{/registro}" class="btn-cta-primary">Comenzar gratis →</a>
+        <a th:href="@{/login}" class="btn-cta-secondary">Ya tengo cuenta</a>
+    </div>
+</section>
+
+<!-- STATS -->
+<div class="stats">
+    <div class="stat-item">
+        <div class="stat-num">100%</div>
+        <div class="stat-lbl">En la nube</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-num">24/7</div>
+        <div class="stat-lbl">Disponible</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-num">Fácil</div>
+        <div class="stat-lbl">De usar</div>
+    </div>
+</div>
+
+<!-- SERVICIOS -->
+<section class="servicios-section">
+    <p class="section-label">¿Qué ofrecemos?</p>
+    <h2>Todo lo que necesitas en un solo lugar</h2>
+
+    <div class="cards-grid">
+        <div class="card">
+            <div class="card-icon-box"><span class="card-icon">👥</span></div>
+            <div class="card-body">
+                <div class="card-label">Gestión de empleados</div>
+                <div class="card-desc">Registra, edita y administra todos tus empleados con información detallada y control de estado.</div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-icon-box"><span class="card-icon">📋</span></div>
+            <div class="card-body">
+                <div class="card-label">Nómina automática</div>
+                <div class="card-desc">Genera nóminas periódicas considerando novedades, contratos y salarios de cada empleado.</div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-icon-box"><span class="card-icon">📊</span></div>
+            <div class="card-body">
+                <div class="card-label">Dashboard en tiempo real</div>
+                <div class="card-desc">Visualiza el estado de tu empresa, empleados activos y métricas clave desde un panel intuitivo.</div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-icon-box"><span class="card-icon">📄</span></div>
+            <div class="card-body">
+                <div class="card-label">Contratos digitales</div>
+                <div class="card-desc">Registra contratos por tipo — indefinido, fijo o prestación de servicios — con fechas y cargo.</div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-icon-box"><span class="card-icon">⚡</span></div>
+            <div class="card-body">
+                <div class="card-label">Novedades y extras</div>
+                <div class="card-desc">Registra horas extra, bonificaciones, incapacidades y deducciones de forma organizada.</div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-icon-box"><span class="card-icon">🔒</span></div>
+            <div class="card-body">
+                <div class="card-label">Roles y seguridad</div>
+                <div class="card-desc">Acceso por roles: administrador, nómina y super admin. Cada usuario ve solo lo que le corresponde.</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA FINAL -->
+<section class="cta-section">
+    <h2>¿Listo para simplificar tu gestión?</h2>
+    <p>Únete a Nominet y lleva el control de tu empresa desde hoy mismo.</p>
+    <a th:href="@{/registro}" class="btn-cta-primary">Registrar mi empresa</a>
+</section>
+
+<footer>
+    &copy; 2026 <span>Nominet</span> · Gestión Empresarial · Todos los derechos reservados
+</footer>
+
+</body>
+</html>

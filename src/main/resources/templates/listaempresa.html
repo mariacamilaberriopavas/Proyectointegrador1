@@ -1,0 +1,115 @@
+<!-- ═══════════════════════════════════════════════════════════
+     ARCHIVO: templates/empleado/lista.html
+═══════════════════════════════════════════════════════════ -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nominet – Empleados</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root { --verde: #16A34A; --azul: #1A2E40; --gris: #202532; --claro: #F3F4F6; }
+        body { font-family: 'Poppins', sans-serif; background: #f0f4f8; }
+
+        nav { background: var(--azul); display: flex; align-items: center; justify-content: space-between; padding: 0 2rem; height: 66px; }
+        .nav-logo { font-size: 1.4rem; font-weight: 800; color: white; }
+        .nav-links { display: flex; gap: 1.5rem; list-style: none; }
+        .nav-links a { color: rgba(255,255,255,.8); text-decoration: none; font-size: .88rem; font-weight: 500; }
+        .nav-links a:hover { color: white; }
+
+        .container { max-width: 1100px; margin: 2.5rem auto; padding: 0 1.5rem; }
+        .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.8rem; }
+        .page-header h1 { font-size: 1.5rem; font-weight: 700; color: var(--azul); }
+
+        .btn-nuevo { background: var(--verde); color: white; font-family: 'Poppins', sans-serif; font-size: .88rem; font-weight: 600; padding: .6rem 1.3rem; border: none; border-radius: 8px; text-decoration: none; transition: background .2s; }
+        .btn-nuevo:hover { background: #15803d; }
+
+        .alert-exito { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; border-radius: 8px; padding: .8rem 1.2rem; margin-bottom: 1.5rem; font-weight: 500; font-size: .9rem; }
+
+        .tabla-wrapper { background: white; border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,.08); overflow: auto; }
+        table { width: 100%; border-collapse: collapse; }
+        thead { background: var(--azul); }
+        thead th { color: white; font-weight: 600; font-size: .85rem; padding: 1rem 1.2rem; text-align: left; }
+        tbody tr { border-bottom: 1px solid #f0f0f0; transition: background .15s; }
+        tbody tr:last-child { border-bottom: none; }
+        tbody tr:hover { background: #f0fdf4; }
+        tbody td { padding: .85rem 1.2rem; font-size: .88rem; }
+
+        .badge { display: inline-block; padding: .2rem .7rem; border-radius: 20px; font-size: .75rem; font-weight: 600; }
+        .badge-activo { background: #dcfce7; color: #166534; }
+        .badge-inactivo { background: #fee2e2; color: #991b1b; }
+
+        .btn-editar { background: #f0fdf4; color: var(--verde); border: 1px solid #bbf7d0; border-radius: 6px; padding: .3rem .85rem; font-size: .8rem; font-weight: 600; text-decoration: none; margin-right: .4rem; }
+        .btn-editar:hover { background: #dcfce7; }
+
+        .btn-desactivar { background: #fff7ed; color: #c2410c; border: 1px solid #fed7aa; border-radius: 6px; padding: .3rem .85rem; font-size: .8rem; font-weight: 600; cursor: pointer; font-family: 'Poppins', sans-serif; }
+        .btn-desactivar:hover { background: #ffedd5; }
+
+        .vacio { text-align: center; padding: 3rem; color: #9ca3af; }
+
+        footer { background: var(--azul); color: rgba(255,255,255,.7); text-align: center; padding: 1rem; font-size: .82rem; margin-top: 3rem; }
+    </style>
+</head>
+<body>
+<nav>
+    <span class="nav-logo">Nominet</span>
+    <ul class="nav-links">
+        <li><a th:href="@{/dashboard}">Dashboard</a></li>
+        <li><a th:href="@{/empleados}">Empleados</a></li>
+        <li><a th:href="@{/logout}">Salir</a></li>
+    </ul>
+</nav>
+
+<div class="container">
+    <div th:if="${exito}" class="alert-exito" th:text="${exito}"></div>
+
+    <div class="page-header">
+        <h1>Empleados</h1>
+        <a th:href="@{/empleados/nuevo}" class="btn-nuevo">+ Nuevo empleado</a>
+    </div>
+
+    <div class="tabla-wrapper">
+        <table th:if="${not #lists.isEmpty(empleados)}">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Cédula</th>
+                    <th>Nombre</th>
+                    <th>Correo</th>
+                    <th>Celular</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="emp, s : ${empleados}">
+                    <td th:text="${s.count}">1</td>
+                    <td th:text="${emp.cedula}">12345</td>
+                    <td th:text="${emp.nombre}">Nombre</td>
+                    <td th:text="${emp.correo}">-</td>
+                    <td th:text="${emp.celular}">-</td>
+                    <td>
+                        <span th:class="'badge badge-' + ${emp.estado}"
+                              th:text="${emp.estado}">activo</span>
+                    </td>
+                    <td>
+                        <a th:href="@{/empleados/editar/{id}(id=${emp.idempleados})}" class="btn-editar">Editar</a>
+                        <form th:action="@{/empleados/desactivar/{id}(id=${emp.idempleados})}"
+                              method="post" style="display:inline">
+                            <button type="submit" class="btn-desactivar"
+                                    onclick="return confirm('¿Desactivar este empleado?')">Desactivar</button>
+                        </form>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <div th:if="${#lists.isEmpty(empleados)}" class="vacio">
+            Aún no hay empleados registrados.
+        </div>
+    </div>
+</div>
+<footer>&copy; 2025 Nominet</footer>
+</body>
+</html>

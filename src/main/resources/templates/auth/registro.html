@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nominet – Registrar Empresa</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root { --verde: #16A34A; --azul: #1A2E40; --gris: #202532; --claro: #F3F4F6; --error: #dc2626; }
+        body { font-family: 'Poppins', sans-serif; background: #f0f4f8; min-height: 100vh; }
+
+        nav {
+            background: var(--azul);
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 2.5rem; height: 68px;
+            box-shadow: 0 4px 8px rgba(0,0,0,.25);
+        }
+        .nav-logo { font-size: 1.4rem; font-weight: 800; color: var(--claro); }
+        .nav-logo span { color: var(--verde); }
+        .nav-back {
+            color: rgba(255,255,255,.8); text-decoration: none;
+            font-size: .9rem; font-weight: 500;
+            display: flex; align-items: center; gap: .4rem;
+            transition: color .2s;
+        }
+        .nav-back:hover { color: white; }
+
+        .form-wrapper { max-width: 640px; margin: 3rem auto; padding: 0 1.5rem 3rem; }
+        .form-card {
+            background: white; border-radius: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,.1); overflow: hidden;
+        }
+        .form-card-header {
+            background: linear-gradient(135deg, var(--verde), #0f7a38);
+            padding: 1.8rem 2rem;
+        }
+        .form-card-header h1 { font-size: 1.5rem; font-weight: 700; color: white; margin-bottom: .3rem; }
+        .form-card-header p { font-size: .88rem; color: rgba(255,255,255,.85); }
+        .form-card-body { padding: 2rem; }
+
+        .form-group { margin-bottom: 1.4rem; }
+        .form-group label {
+            display: block; font-size: .85rem; font-weight: 600;
+            color: var(--azul); margin-bottom: .5rem;
+        }
+        .form-group input {
+            width: 100%; padding: .75rem 1rem;
+            border: 1.5px solid #d1d5db; border-radius: 10px;
+            font-family: 'Poppins', sans-serif; font-size: .92rem; color: var(--gris);
+            transition: border-color .2s, box-shadow .2s; outline: none; background: #fafafa;
+        }
+        .form-group input:focus {
+            border-color: var(--verde);
+            box-shadow: 0 0 0 3px rgba(22,163,74,.12); background: white;
+        }
+        .form-group input.is-invalid { border-color: var(--error); }
+        .error-msg {
+            color: var(--error); font-size: .8rem; font-weight: 500;
+            margin-top: .35rem; display: block;
+        }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        @media (max-width: 520px) { .form-row { grid-template-columns: 1fr; } }
+
+        .form-actions {
+            display: flex; gap: 1rem; justify-content: flex-end;
+            margin-top: 2rem; padding-top: 1.5rem;
+            border-top: 1px solid #f0f0f0;
+        }
+        .btn-cancelar {
+            background: white; color: var(--gris);
+            border: 1.5px solid #d1d5db; border-radius: 8px;
+            padding: .7rem 1.6rem; font-family: 'Poppins', sans-serif;
+            font-size: .9rem; font-weight: 600;
+            text-decoration: none; cursor: pointer; transition: background .2s;
+        }
+        .btn-cancelar:hover { background: #f3f4f6; }
+        .btn-guardar {
+            background: var(--verde); color: white;
+            border: none; border-radius: 8px;
+            padding: .7rem 1.8rem; font-family: 'Poppins', sans-serif;
+            font-size: .9rem; font-weight: 700; letter-spacing: .3px;
+            cursor: pointer; transition: background .2s, transform .15s;
+        }
+        .btn-guardar:hover { background: #15803d; transform: translateY(-1px); }
+    </style>
+</head>
+<body>
+<nav>
+    <span class="nav-logo">Nomi<span>net</span></span>
+    <a th:href="@{/}" class="nav-back">← Volver al inicio</a>
+</nav>
+
+<div class="form-wrapper">
+    <div class="form-card">
+        <div class="form-card-header">
+            <h1>Registrar empresa</h1>
+            <p>Completa los datos para crear tu cuenta en Nominet</p>
+        </div>
+        <div class="form-card-body">
+            <!-- Acción corregida: va a /registro -->
+            <form th:action="@{/registro}" th:object="${empresa}" method="post">
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="nit">NIT</label>
+                        <input type="text" id="nit" th:field="*{nit}"
+                               th:classappend="${#fields.hasErrors('nit')} ? 'is-invalid'"
+                               placeholder="900123456-1">
+                        <span class="error-msg" th:if="${#fields.hasErrors('nit')}"
+                              th:errors="*{nit}"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="nombre">Nombre de la empresa</label>
+                        <input type="text" id="nombre" th:field="*{nombre}"
+                               th:classappend="${#fields.hasErrors('nombre')} ? 'is-invalid'"
+                               placeholder="Mi Empresa S.A.S">
+                        <span class="error-msg" th:if="${#fields.hasErrors('nombre')}"
+                              th:errors="*{nombre}"></span>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="correo">Correo electrónico</label>
+                        <input type="email" id="correo" th:field="*{correo}"
+                               th:classappend="${#fields.hasErrors('correo')} ? 'is-invalid'"
+                               placeholder="empresa@correo.com">
+                        <span class="error-msg" th:if="${#fields.hasErrors('correo')}"
+                              th:errors="*{correo}"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="celular">Celular</label>
+                        <input type="text" id="celular" th:field="*{celular}"
+                               placeholder="3001234567">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Contraseña</label>
+                    <input type="password" id="password" th:field="*{password}"
+                           th:classappend="${#fields.hasErrors('password')} ? 'is-invalid'"
+                           placeholder="Mínimo 6 caracteres">
+                    <span class="error-msg" th:if="${#fields.hasErrors('password')}"
+                          th:errors="*{password}"></span>
+                </div>
+
+                <div class="form-actions">
+                    <a th:href="@{/}" class="btn-cancelar">Cancelar</a>
+                    <button type="submit" class="btn-guardar">Registrar empresa</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>
