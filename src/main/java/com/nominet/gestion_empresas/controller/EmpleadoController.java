@@ -33,7 +33,7 @@ public class EmpleadoController {
 
         model.addAttribute("empresa", empresa);
 
-        return "empleado/lista";
+        return "empleados/lista";
     }
 
     // =========================
