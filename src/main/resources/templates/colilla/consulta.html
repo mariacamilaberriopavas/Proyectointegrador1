@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nominet – Colilla de Pago</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root { --verde: #16A34A; --azul: #1A2E40; }
+        body { font-family: 'Poppins', sans-serif; background: #f0f4f8; }
+
+        nav { background: var(--azul); display: flex; align-items: center; justify-content: space-between; padding: 0 2rem; height: 66px; box-shadow: 0 2px 8px rgba(0,0,0,.3); }
+        .nav-logo { font-size: 1.4rem; font-weight: 800; color: white; text-decoration: none; }
+        .nav-right { display: flex; align-items: center; gap: 1.5rem; }
+        .badge-rol { background: rgba(22,163,74,.25); color: #86efac; border: 1px solid rgba(22,163,74,.4); font-size: .72rem; font-weight: 700; padding: .2rem .65rem; border-radius: 20px; text-transform: uppercase; }
+        .btn-logout { color: white; background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.3); padding: .4rem 1rem; border-radius: 6px; text-decoration: none; font-size: .85rem; font-weight: 500; }
+
+        .layout { display: flex; min-height: calc(100vh - 66px); }
+
+        aside { width: 230px; background: white; box-shadow: 2px 0 8px rgba(0,0,0,.06); padding: 1.5rem 0; flex-shrink: 0; }
+        .sidebar-profile { padding: 1.2rem 1.6rem 1.5rem; border-bottom: 1px solid #f0f0f0; margin-bottom: .5rem; }
+        .profile-avatar { width: 44px; height: 44px; border-radius: 50%; background: var(--verde); color: white; font-weight: 800; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; margin-bottom: .75rem; }
+        .profile-name { font-size: .92rem; font-weight: 700; color: var(--azul); }
+        .sidebar-section { padding: .5rem 1.6rem; font-size: .72rem; font-weight: 700; text-transform: uppercase; color: #9ca3af; letter-spacing: .06em; margin-top: .5rem; }
+        .sidebar-menu { list-style: none; }
+        .sidebar-menu li a { display: flex; align-items: center; gap: .8rem; padding: .75rem 1.6rem; color: #4b5563; text-decoration: none; font-size: .9rem; font-weight: 500; transition: background .2s; border-left: 3px solid transparent; }
+        .sidebar-menu li a:hover, .sidebar-menu li a.active { background: #f0fdf4; color: var(--verde); border-left-color: var(--verde); }
+
+        main { flex: 1; padding: 2rem; }
+        .page-title { font-size: 1.5rem; font-weight: 700; color: var(--azul); margin-bottom: 2rem; }
+
+        /* Buscador */
+        .search-card { background: white; border-radius: 16px; padding: 1.5rem 2rem; box-shadow: 0 2px 10px rgba(0,0,0,.07); margin-bottom: 2rem; }
+        .search-card h3 { font-size: 1rem; font-weight: 700; color: var(--azul); margin-bottom: 1rem; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr auto; gap: 1rem; align-items: end; }
+        .form-group { display: flex; flex-direction: column; gap: .4rem; }
+        label { font-size: .85rem; font-weight: 600; color: #374151; }
+        input[type="date"] { padding: .65rem .9rem; border: 1.5px solid #d1d5db; border-radius: 9px; font-family: 'Poppins', sans-serif; font-size: .88rem; }
+        input[type="date"]:focus { outline: none; border-color: var(--verde); }
+        .btn-buscar { background: var(--verde); color: white; border: none; padding: .65rem 1.5rem; border-radius: 9px; font-family: 'Poppins', sans-serif; font-size: .88rem; font-weight: 700; cursor: pointer; }
+        .btn-buscar:hover { background: #15803d; }
+
+        .alert-info { background: #fef9c3; color: #854d0e; border: 1px solid #fde68a; border-radius: 8px; padding: .9rem 1.2rem; margin-bottom: 1.5rem; font-size: .88rem; }
+
+        /* Colilla */
+        .colilla { background: white; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,.1); overflow: hidden; max-width: 720px; }
+
+        .colilla-header { background: var(--azul); padding: 1.8rem 2rem; color: white; }
+        .colilla-header .empresa-tag { font-size: .78rem; opacity: .65; text-transform: uppercase; letter-spacing: .06em; }
+        .colilla-header h2 { font-size: 1.3rem; font-weight: 800; margin: .3rem 0 .5rem; }
+        .colilla-header .periodo { font-size: .88rem; opacity: .8; }
+        .emp-meta { display: flex; gap: 2rem; margin-top: 1rem; flex-wrap: wrap; }
+        .emp-meta .item .lbl { font-size: .72rem; opacity: .6; }
+        .emp-meta .item .val { font-size: .88rem; font-weight: 600; }
+
+        .colilla-body { padding: 1.5rem 2rem; }
+
+        .seccion { margin-bottom: 1.2rem; }
+        .seccion-titulo { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: #9ca3af; padding-bottom: .5rem; border-bottom: 1px solid #f0f0f0; margin-bottom: .6rem; }
+        .linea { display: flex; justify-content: space-between; align-items: center; padding: .45rem 0; font-size: .88rem; }
+        .linea .concepto { color: #374151; }
+        .linea .monto { font-weight: 600; color: var(--azul); }
+        .linea .monto.deduccion { color: #dc2626; }
+        .linea-subtotal { font-weight: 700; border-top: 1px solid #e5e7eb; padding-top: .6rem; margin-top: .2rem; }
+        .linea-aux { background: #fef9c3; border-radius: 6px; padding: .45rem .7rem; margin: .3rem 0; display: flex; justify-content: space-between; }
+        .linea-aux .concepto { font-size: .86rem; color: #854d0e; }
+        .linea-aux .monto { font-weight: 600; color: #854d0e; }
+        .badge-pct { font-size: .7rem; background: #dbeafe; color: #1d4ed8; padding: .15rem .5rem; border-radius: 4px; font-weight: 700; margin-left: .5rem; }
+
+        .colilla-total { background: #f0fdf4; border-top: 2px solid #bbf7d0; padding: 1.3rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+        .colilla-total .lbl { font-size: 1rem; font-weight: 700; color: var(--azul); }
+        .colilla-total .val { font-size: 1.8rem; font-weight: 800; color: var(--verde); }
+
+        .nota-legal { font-size: .74rem; color: #9ca3af; text-align: center; padding: .8rem 2rem 1rem; }
+
+        footer { background: var(--azul); color: rgba(255,255,255,.6); text-align: center; padding: 1rem; font-size: .8rem; }
+    </style>
+</head>
+<body>
+
+<nav>
+    <a th:href="@{/dashboard-empleado}" class="nav-logo">Nominet</a>
+    <div class="nav-right">
+        <span class="badge-rol" th:text="${usuario.rol}">trabajador</span>
+        <a th:href="@{/logout}" class="btn-logout">Cerrar sesión</a>
+    </div>
+</nav>
+
+<div class="layout">
+    <aside>
+        <div class="sidebar-profile">
+            <div class="profile-avatar" th:text="${usuario.empleado.nombre.substring(0,1).toUpperCase()}">E</div>
+            <div class="profile-name" th:text="${usuario.empleado.nombre}">Empleado</div>
+        </div>
+        <ul class="sidebar-menu">
+            <li><a th:href="@{/dashboard-empleado}"><span>🏠</span> Mi panel</a></li>
+        </ul>
+        <div class="sidebar-section">Mis pagos</div>
+        <ul class="sidebar-menu">
+            <li><a th:href="@{/colilla/consultar}" class="active"><span>📄</span> Colilla de pago</a></li>
+            <li><a th:href="@{/horas-extras/consultar}"><span>⏱️</span> Horas extras</a></li>
+        </ul>
+    </aside>
+
+    <main>
+        <h1 class="page-title">📄 Colilla de pago</h1>
+
+        <!-- Buscador -->
+        <div class="search-card">
+            <h3>Buscar por período</h3>
+            <form action="/colilla/consultar" method="get">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Fecha inicio</label>
+                        <input type="date" name="periodoInicio" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Fecha fin</label>
+                        <input type="date" name="periodoFin" required>
+                    </div>
+                    <button type="submit" class="btn-buscar">🔍 Consultar</button>
+                </div>
+            </form>
+        </div>
+
+        <div th:if="${mensaje}" class="alert-info">ℹ️ <span th:text="${mensaje}">Mensaje</span></div>
+
+        <!-- Colilla con desglose completo -->
+        <div th:if="${colilla}" class="colilla">
+
+            <!-- Encabezado -->
+            <div class="colilla-header">
+                <div class="empresa-tag" th:text="${usuario.empleado.empresa.nombre}">Empresa</div>
+                <h2>Colilla de Pago</h2>
+                <div class="periodo">
+                    Período: <strong th:text="${#temporals.format(colilla.periodoInicio,'dd/MM/yyyy') + ' → ' + #temporals.format(colilla.periodoFin,'dd/MM/yyyy')}">-</strong>
+                </div>
+                <div class="emp-meta">
+                    <div class="item">
+                        <div class="lbl">Empleado</div>
+                        <div class="val" th:text="${usuario.empleado.nombre}">-</div>
+                    </div>
+                    <div class="item">
+                        <div class="lbl">Cédula</div>
+                        <div class="val" th:text="${usuario.empleado.cedula}">-</div>
+                    </div>
+                    <div class="item">
+                        <div class="lbl">Correo</div>
+                        <div class="val" th:text="${usuario.empleado.correo}">-</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="colilla-body">
+
+                <!-- INGRESOS -->
+                <div class="seccion">
+                    <div class="seccion-titulo">Ingresos</div>
+                    <div class="linea">
+                        <span class="concepto">Salario básico mensual</span>
+                        <span class="monto">$<span th:text="${#numbers.formatDecimal(colilla.salarioBase,1,'POINT',0,'COMMA')}">0</span></span>
+                    </div>
+                    <!-- Auxilio transporte: se muestra si salarioBase <= 2 SMMLV = $2.847.000 -->
+                    <div th:if="${colilla.salarioBase.compareTo(new java.math.BigDecimal('2847000')) <= 0}"
+                         class="linea-aux">
+                        <span class="concepto">🚌 Auxilio de transporte <small>(salario ≤ 2 SMMLV)</small></span>
+                        <span class="monto">+ $202.612</span>
+                    </div>
+                    <div th:if="${colilla.valorHorasExtras != null and colilla.valorHorasExtras.compareTo(java.math.BigDecimal.ZERO) > 0}" class="linea">
+                        <span class="concepto">Horas extras
+                            (<span th:text="${colilla.horasExtras}">0</span> hrs)
+                        </span>
+                        <span class="monto">$<span th:text="${#numbers.formatDecimal(colilla.valorHorasExtras,1,'POINT',0,'COMMA')}">0</span></span>
+                    </div>
+                </div>
+
+                <!-- DEDUCCIONES -->
+                <div class="seccion">
+                    <div class="seccion-titulo">Deducciones obligatorias</div>
+                    <!-- Salud 4% -->
+                    <div class="linea">
+                        <span class="concepto">Salud empleado <span class="badge-pct">4%</span></span>
+                        <span class="monto deduccion">- $<span th:text="${#numbers.formatDecimal(colilla.salarioBase.multiply(new java.math.BigDecimal('0.04')).setScale(0,java.math.RoundingMode.HALF_UP),1,'POINT',0,'COMMA')}">0</span></span>
+                    </div>
+                    <!-- Pensión 4% -->
+                    <div class="linea">
+                        <span class="concepto">Pensión empleado <span class="badge-pct">4%</span></span>
+                        <span class="monto deduccion">- $<span th:text="${#numbers.formatDecimal(colilla.salarioBase.multiply(new java.math.BigDecimal('0.04')).setScale(0,java.math.RoundingMode.HALF_UP),1,'POINT',0,'COMMA')}">0</span></span>
+                    </div>
+                    <!-- Fondo solidaridad 1% si salario > 4 SMMLV = $5.694.000 -->
+                    <div th:if="${colilla.salarioBase.compareTo(new java.math.BigDecimal('5694000')) > 0}" class="linea">
+                        <span class="concepto">Fondo solidaridad <span class="badge-pct">1%</span> <small>(salario &gt; 4 SMMLV)</small></span>
+                        <span class="monto deduccion">- $<span th:text="${#numbers.formatDecimal(colilla.salarioBase.multiply(new java.math.BigDecimal('0.01')).setScale(0,java.math.RoundingMode.HALF_UP),1,'POINT',0,'COMMA')}">0</span></span>
+                    </div>
+                    <!-- Total deducciones -->
+                    <div class="linea linea-subtotal">
+                        <span class="concepto">Total deducciones</span>
+                        <span class="monto deduccion">- $<span th:text="${#numbers.formatDecimal(colilla.deducciones,1,'POINT',0,'COMMA')}">0</span></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total neto -->
+            <div class="colilla-total">
+                <span class="lbl">💵 Neto a pagar</span>
+                <span class="val">$<span th:text="${#numbers.formatDecimal(colilla.totalPagar,1,'POINT',0,'COMMA')}">0</span></span>
+            </div>
+
+            <div class="nota-legal">
+                Liquidación conforme al Código Sustantivo del Trabajo (CST) colombiano.
+                SMMLV 2025: $1.423.500 · Auxilio de transporte: $202.612
+            </div>
+        </div>
+    </main>
+</div>
+
+<footer>&copy; 2025 Nominet · Sistema de Gestión de Nómina</footer>
+</body>
+</html>

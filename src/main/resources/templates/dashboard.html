@@ -7,90 +7,98 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        :root { --verde: #16A34A; --azul: #1A2E40; --gris: #202532; --claro: #F3F4F6; }
+        :root { --verde: #16A34A; --azul: #1A2E40; }
         body { font-family: 'Poppins', sans-serif; background: #f0f4f8; }
 
-        /* NAVBAR */
         nav {
             background: var(--azul); display: flex; align-items: center;
             justify-content: space-between; padding: 0 2rem; height: 66px;
             box-shadow: 0 2px 8px rgba(0,0,0,.3);
         }
-        .nav-logo { font-size: 1.4rem; font-weight: 800; color: white; }
+        .nav-logo { font-size: 1.4rem; font-weight: 800; color: white; text-decoration: none; }
         .nav-right { display: flex; align-items: center; gap: 1.5rem; }
         .nav-empresa { color: rgba(255,255,255,.8); font-size: .88rem; }
         .nav-empresa span { color: white; font-weight: 600; }
         .btn-logout {
             color: white; background: rgba(255,255,255,.15);
-            border: 1px solid rgba(255,255,255,.3);
-            padding: .4rem 1rem; border-radius: 6px;
-            text-decoration: none; font-size: .85rem; font-weight: 500;
-            transition: background .2s;
+            border: 1px solid rgba(255,255,255,.3); padding: .4rem 1rem;
+            border-radius: 6px; text-decoration: none; font-size: .85rem; font-weight: 500;
         }
         .btn-logout:hover { background: rgba(255,255,255,.25); }
 
-        /* LAYOUT */
         .layout { display: flex; min-height: calc(100vh - 66px); }
 
-        /* SIDEBAR */
         aside {
             width: 230px; background: white;
             box-shadow: 2px 0 8px rgba(0,0,0,.06);
             padding: 1.5rem 0; flex-shrink: 0;
         }
+        .sidebar-section {
+            padding: .5rem 1.6rem; font-size: .72rem; font-weight: 700;
+            text-transform: uppercase; color: #9ca3af; letter-spacing: .06em; margin-top: .8rem;
+        }
         .sidebar-menu { list-style: none; }
         .sidebar-menu li a {
             display: flex; align-items: center; gap: .8rem;
-            padding: .8rem 1.6rem; color: #4b5563;
+            padding: .75rem 1.6rem; color: #4b5563;
             text-decoration: none; font-size: .9rem; font-weight: 500;
-            transition: background .2s, color .2s; border-left: 3px solid transparent;
+            transition: background .2s; border-left: 3px solid transparent;
         }
-        .sidebar-menu li a:hover,
-        .sidebar-menu li a.active {
-            background: #f0fdf4; color: var(--verde);
-            border-left-color: var(--verde);
+        .sidebar-menu li a:hover, .sidebar-menu li a.active {
+            background: #f0fdf4; color: var(--verde); border-left-color: var(--verde);
         }
-        .sidebar-menu li a .icon { font-size: 1.1rem; }
 
-        /* CONTENT */
         main { flex: 1; padding: 2rem; }
 
-        .page-title { font-size: 1.5rem; font-weight: 700; color: var(--azul); margin-bottom: 2rem; }
+        .page-title { font-size: 1.5rem; font-weight: 700; color: var(--azul); margin-bottom: .4rem; }
         .page-title span { color: var(--verde); }
+        .page-sub { color: #6b7280; font-size: .88rem; margin-bottom: 2rem; }
 
-        /* CARDS RESUMEN */
+        .alert-exito {
+            background: #dcfce7; color: #166534; border: 1px solid #bbf7d0;
+            border-radius: 8px; padding: .9rem 1.2rem; margin-bottom: 1.5rem; font-weight: 500;
+        }
+
         .cards-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 1.2rem; margin-bottom: 2.5rem;
         }
         .stat-card {
-            background: white; border-radius: 16px;
-            padding: 1.5rem; box-shadow: 0 2px 10px rgba(0,0,0,.07);
-            border-left: 4px solid var(--verde);
+            background: white; border-radius: 16px; padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,.07); border-left: 4px solid var(--verde);
         }
         .stat-card .stat-label { font-size: .82rem; color: #6b7280; font-weight: 500; margin-bottom: .5rem; }
         .stat-card .stat-value { font-size: 2rem; font-weight: 800; color: var(--azul); }
+        .stat-card .stat-sub { font-size: .75rem; color: #9ca3af; margin-top: .25rem; }
 
-        /* ACCIONES RAPIDAS */
-        .quick-actions h2 { font-size: 1.1rem; font-weight: 700; color: var(--azul); margin-bottom: 1rem; }
-        .actions-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; }
+        .section-title { font-size: 1.1rem; font-weight: 700; color: var(--azul); margin-bottom: 1rem; }
+
+        .actions-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
+            gap: 1rem; margin-bottom: 2.5rem;
+        }
         .action-card {
             background: white; border-radius: 14px; padding: 1.4rem 1.2rem;
             box-shadow: 0 2px 10px rgba(0,0,0,.07);
-            text-decoration: none; color: var(--gris);
+            text-decoration: none; color: #374151;
             display: flex; flex-direction: column; gap: .6rem;
-            transition: transform .2s, box-shadow .2s;
+            transition: transform .2s, box-shadow .2s; border: 1.5px solid transparent;
         }
-        .action-card:hover { transform: translateY(-3px); box-shadow: 0 6px 18px rgba(0,0,0,.12); }
+        .action-card:hover { transform: translateY(-3px); box-shadow: 0 6px 18px rgba(0,0,0,.12); border-color: #bbf7d0; }
         .action-card .action-icon { font-size: 1.8rem; }
         .action-card .action-title { font-size: .95rem; font-weight: 700; color: var(--azul); }
         .action-card .action-desc { font-size: .78rem; color: #9ca3af; }
+
+        footer {
+            background: var(--azul); color: rgba(255,255,255,.6);
+            text-align: center; padding: 1rem; font-size: .8rem;
+        }
     </style>
 </head>
 <body>
+
 <nav>
-    <span class="nav-logo">Nominet</span>
+    <a th:href="@{/dashboard}" class="nav-logo">Nominet</a>
     <div class="nav-right">
         <span class="nav-empresa">Bienvenido, <span th:text="${empresa.nombre}">Empresa</span></span>
         <a th:href="@{/logout}" class="btn-logout">Cerrar sesión</a>
@@ -98,60 +106,61 @@
 </nav>
 
 <div class="layout">
-    <!-- Sidebar -->
     <aside>
         <ul class="sidebar-menu">
-            <li><a th:href="@{/dashboard}" class="active"><span class="icon">🏠</span> Dashboard</a></li>
-            <li><a th:href="@{/empleados}"><span class="icon">👥</span> Empleados</a></li>
-            <li><a th:href="@{/empresas/editar/{id}(id=${empresa.idempresa})}"><span class="icon">🏢</span> Mi empresa</a></li>
+            <li><a th:href="@{/dashboard}" class="active"><span>🏠</span> Dashboard</a></li>
+        </ul>
+        <div class="sidebar-section">Gestión</div>
+        <ul class="sidebar-menu">
+            <li><a th:href="@{/empleados}"><span>👥</span> Empleados</a></li>
+            <li><a th:href="@{/empleados/nuevo}"><span>➕</span> Nuevo empleado</a></li>
+        </ul>
+        <div class="sidebar-section">Empresa</div>
+        <ul class="sidebar-menu">
+            <li><a th:href="@{/empresas/editar/__${empresa.idempresa}__}"><span>🏢</span> Mi empresa</a></li>
         </ul>
     </aside>
 
-    <!-- Contenido -->
     <main>
-        <h1 class="page-title">
-            Hola, <span th:text="${empresa.nombre}">Empresa</span> 👋
-        </h1>
+        <div th:if="${exito}" class="alert-exito">✔ <span th:text="${exito}"></span></div>
 
-        <div th:if="${exito}" 
-          style="background:#dcfce7;color:#166534;padding:12px;border-radius:10px;margin-bottom:20px;">
-         <strong>✔</strong> <span th:text="${exito}"></span>
-       </div>
+        <h1 class="page-title">Hola, <span th:text="${empresa.nombre}">Empresa</span> 👋</h1>
+        <p class="page-sub">Resumen del sistema de nómina</p>
 
-        <!-- Stats -->
         <div class="cards-grid">
             <div class="stat-card">
                 <div class="stat-label">Total empleados</div>
                 <div class="stat-value" th:text="${totalEmpleados}">0</div>
+                <div class="stat-sub">Registrados en el sistema</div>
             </div>
-            <div class="stat-card">
-                <div class="stat-label">NIT</div>
-                <div class="stat-value" style="font-size:1rem;padding-top:.4rem" th:text="${empresa.nit}">-</div>
+            <div class="stat-card" style="border-left-color:#3b82f6;">
+                <div class="stat-label">NIT empresa</div>
+                <div class="stat-value" style="font-size:1.1rem;padding-top:.4rem" th:text="${empresa.nit}">-</div>
+                <div class="stat-sub" th:text="${empresa.correo}">correo</div>
             </div>
         </div>
 
-        <!-- Acciones rápidas -->
-        <div class="quick-actions">
-            <h2>Acciones rápidas</h2>
-            <div class="actions-grid">
-                <a th:href="@{/empleados/nuevo}" class="action-card">
-                    <span class="action-icon">➕</span>
-                    <span class="action-title">Nuevo empleado</span>
-                    <span class="action-desc">Registrar un empleado</span>
-                </a>
-                <a th:href="@{/empleados}" class="action-card">
-                    <span class="action-icon">👥</span>
-                    <span class="action-title">Ver empleados</span>
-                    <span class="action-desc">Lista de empleados</span>
-                </a>
-                <a th:href="@{/empresas/editar/{id}(id=${empresa.idempresa})}" class="action-card">
-                    <span class="action-icon">✏️</span>
-                    <span class="action-title">Editar empresa</span>
-                    <span class="action-desc">Actualizar datos</span>
-                </a>
-            </div>
+        <div class="section-title">Acciones rápidas</div>
+        <div class="actions-grid">
+            <a th:href="@{/empleados/nuevo}" class="action-card">
+                <span class="action-icon">➕</span>
+                <span class="action-title">Nuevo empleado</span>
+                <span class="action-desc">Registrar un empleado</span>
+            </a>
+            <a th:href="@{/empleados}" class="action-card">
+                <span class="action-icon">👥</span>
+                <span class="action-title">Ver empleados</span>
+                <span class="action-desc">Lista y gestión completa</span>
+            </a>
+            <a th:href="@{/empresas/editar/__${empresa.idempresa}__}" class="action-card">
+                <span class="action-icon">✏️</span>
+                <span class="action-title">Editar empresa</span>
+                <span class="action-desc">Actualizar datos</span>
+            </a>
         </div>
     </main>
 </div>
+
+<footer>&copy; 2025 Nominet · Sistema de Gestión de Nómina</footer>
 </body>
 </html>

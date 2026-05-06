@@ -1,7 +1,9 @@
 package com.nominet.gestion_empresas.controller;
 
 import com.nominet.gestion_empresas.model.Empresa;
+import com.nominet.gestion_empresas.model.Usuario;
 import com.nominet.gestion_empresas.service.EmpresaService;
+import com.nominet.gestion_empresas.service.UsuarioService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,13 +21,19 @@ public class AuthController {
     @Autowired
     private EmpresaService empresaService;
 
+    @Autowired
+    private UsuarioService usuarioService;
+
     // ─── GET /login ───────────────────────────────────────
     @GetMapping("/login")
     public String mostrarLogin(HttpSession session) {
         if (session.getAttribute("empresaLogueada") != null) {
             return "redirect:/dashboard";
         }
-        // Busca templates/auth/login.html
+        if (session.getAttribute("usuarioLogueado") != null) {
+            Usuario u = (Usuario) session.getAttribute("usuarioLogueado");
+            return redirectByRol(u.getRol());
+        }
         return "auth/login";
     }
 
@@ -36,11 +44,20 @@ public class AuthController {
                                 HttpSession session,
                                 RedirectAttributes flash) {
 
+        // 1) Login como empresa (rol ADMIN)
         Optional<Empresa> empresa = empresaService.login(correo, password);
-
         if (empresa.isPresent()) {
             session.setAttribute("empresaLogueada", empresa.get());
+            session.setAttribute("tipoUsuario", "ADMIN");
             return "redirect:/dashboard";
+        }
+
+        // 2) Login como usuario (NOMINA / TRABAJADOR / SUPER_ADMIN)
+        Optional<Usuario> usuario = usuarioService.login(correo, password);
+        if (usuario.isPresent()) {
+            session.setAttribute("usuarioLogueado", usuario.get());
+            session.setAttribute("tipoUsuario", usuario.get().getRol());
+            return redirectByRol(usuario.get().getRol());
         }
 
         flash.addFlashAttribute("error", "Correo o contraseña incorrectos");
@@ -51,7 +68,6 @@ public class AuthController {
     @GetMapping("/registro")
     public String mostrarRegistro(Model model) {
         model.addAttribute("empresa", new Empresa());
-        // Busca templates/auth/registro.html
         return "auth/registro";
     }
 
@@ -61,15 +77,12 @@ public class AuthController {
                                    BindingResult result,
                                    RedirectAttributes flash) {
 
-        if (result.hasErrors()) {
-            return "auth/registro";
-        }
+        if (result.hasErrors()) return "auth/registro";
 
         if (empresaService.existeNit(empresa.getNit())) {
             result.rejectValue("nit", "error.empresa", "Ya existe una empresa con ese NIT");
             return "auth/registro";
         }
-
         if (empresaService.existeCorreo(empresa.getCorreo())) {
             result.rejectValue("correo", "error.empresa", "Ya existe una empresa con ese correo");
             return "auth/registro";
@@ -84,6 +97,17 @@ public class AuthController {
     @GetMapping("/logout")
     public String logout(HttpSession session) {
         session.invalidate();
-        return "redirect:/login";
+        return "redirect:/";
+    }
+
+    // ─── HELPER ───────────────────────────────────────────
+    private String redirectByRol(String rol) {
+        if (rol == null) return "redirect:/dashboard-empleado";
+        return switch (rol.toUpperCase()) {
+            case "SUPER_ADMIN" -> "redirect:/admin/empresas";
+            case "NOMINA"      -> "redirect:/nomina/dashboard";
+            case "TRABAJADOR"  -> "redirect:/dashboard-empleado";
+            default            -> "redirect:/dashboard-empleado";
+        };
     }
 }

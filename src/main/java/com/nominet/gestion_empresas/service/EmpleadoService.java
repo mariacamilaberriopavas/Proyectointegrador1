@@ -6,7 +6,6 @@ import com.nominet.gestion_empresas.model.Usuario;
 import com.nominet.gestion_empresas.repository.EmpleadoRepository;
 import com.nominet.gestion_empresas.repository.EmpresaRepository;
 import com.nominet.gestion_empresas.repository.UsuarioRepository;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -30,39 +29,28 @@ public class EmpleadoService {
     private BCryptPasswordEncoder passwordEncoder;
 
     // ── CREATE ────────────────────────────────────────────
-    
     public Empleado registrar(Empleado empleado, String rol) {
+        empleado.setEstado("activo");
+        Empleado empGuardado = empleadoRepository.save(empleado);
 
-    empleado.setEstado("activo");
+        // Validar que no exista usuario con ese correo
+        if (usuarioRepository.findByCorreo(empGuardado.getCorreo()).isPresent()) {
+            throw new RuntimeException("Ya existe un usuario con ese correo: " + empGuardado.getCorreo());
+        }
 
-    //Guardar empleado 
-    Empleado empGuardado = empleadoRepository.save(empleado);
+        // Crear usuario automáticamente
+        Usuario usuario = new Usuario();
+        usuario.setCorreo(empGuardado.getCorreo());
+        usuario.setPassword(passwordEncoder.encode("123456")); // contraseña por defecto
+        usuario.setRol(rol.toUpperCase());
+        usuario.setUsuariocl(empGuardado.getNombre());
+        usuario.setEmpleado(empGuardado);
+        usuarioRepository.save(usuario);
 
-    //Validamos si existe un  usuario con el correo ingresado 
-    if (usuarioRepository.findByCorreo(empGuardado.getCorreo()).isPresent()) {
-        throw new RuntimeException("Ya existe un usuario con ese correo");
+        return empGuardado;
     }
 
-    // Creamos el usuario automáticamente
-    Usuario usuario = new Usuario();
-    usuario.setCorreo(empGuardado.getCorreo());
-
-    // contraseña por defecto  
-    usuario.setPassword(passwordEncoder.encode("123456"));
-
-    usuario.setRol(rol); 
-
-    usuario.setUsuariocl(empGuardado.getNombre());
-
-    usuario.setEmpleado(empGuardado);
-
-    //  Guardar usuario
-    usuarioRepository.save(usuario);
-
-    return empGuardado;
-    }
-
-    // ── READ – todos los de una empresa ───────────────────
+    // ── READ ──────────────────────────────────────────────
     public List<Empleado> listarPorEmpresa(Integer idEmpresa) {
         Empresa empresa = empresaRepository.findById(idEmpresa)
                 .orElseThrow(() -> new RuntimeException("Empresa no encontrada"));
@@ -77,7 +65,6 @@ public class EmpleadoService {
     public Empleado actualizar(Integer id, Empleado datos) {
         Empleado existente = empleadoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Empleado no encontrado: " + id));
-
         existente.setCedula(datos.getCedula());
         existente.setNombre(datos.getNombre());
         existente.setCelular(datos.getCelular());
@@ -86,7 +73,7 @@ public class EmpleadoService {
         return empleadoRepository.save(existente);
     }
 
-    // ── DESACTIVAR (soft-delete) ───────────────────────────
+    // ── DESACTIVAR (soft-delete) ──────────────────────────
     public void desactivar(Integer id) {
         Empleado emp = empleadoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Empleado no encontrado"));
@@ -94,6 +81,15 @@ public class EmpleadoService {
         empleadoRepository.save(emp);
     }
 
+    // ── REACTIVAR ─────────────────────────────────────────
+    public void reactivar(Integer id) {
+        Empleado emp = empleadoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Empleado no encontrado"));
+        emp.setEstado("activo");
+        empleadoRepository.save(emp);
+    }
+
+    // ── VALIDACIONES ──────────────────────────────────────
     public boolean existeCedula(Integer cedula) {
         return empleadoRepository.findByCedula(cedula).isPresent();
     }

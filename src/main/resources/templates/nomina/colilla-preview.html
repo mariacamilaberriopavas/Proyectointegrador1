@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nominet – Generar Colilla</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root { --verde: #16A34A; --azul: #1A2E40; --nom: #3b82f6; }
+        body { font-family: 'Poppins', sans-serif; background: #f0f4f8; }
+        nav { background: var(--azul); display: flex; align-items: center; justify-content: space-between; padding: 0 2rem; height: 66px; box-shadow: 0 2px 8px rgba(0,0,0,.3); }
+        .nav-logo { font-size: 1.4rem; font-weight: 800; color: white; text-decoration: none; }
+        .badge-rol { background: rgba(59,130,246,.3); color: #93c5fd; border: 1px solid rgba(59,130,246,.4); font-size: .72rem; font-weight: 700; padding: .2rem .65rem; border-radius: 20px; text-transform: uppercase; }
+        .btn-logout { color: white; background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.3); padding: .4rem 1rem; border-radius: 6px; text-decoration: none; font-size: .85rem; font-weight: 500; }
+        .layout { display: flex; min-height: calc(100vh - 66px); }
+        aside { width: 230px; background: white; box-shadow: 2px 0 8px rgba(0,0,0,.06); padding: 1.5rem 0; flex-shrink: 0; }
+        .sidebar-section { padding: .5rem 1.6rem; font-size: .72rem; font-weight: 700; text-transform: uppercase; color: #9ca3af; letter-spacing: .06em; margin-top: .5rem; }
+        .sidebar-menu { list-style: none; }
+        .sidebar-menu li a { display: flex; align-items: center; gap: .8rem; padding: .75rem 1.6rem; color: #4b5563; text-decoration: none; font-size: .9rem; font-weight: 500; border-left: 3px solid transparent; transition: background .2s; }
+        .sidebar-menu li a:hover, .sidebar-menu li a.active { background: #eff6ff; color: var(--nom); border-left-color: var(--nom); }
+
+        main { flex: 1; padding: 2rem; }
+
+        /* Selector de período */
+        .periodo-card { background: white; border-radius: 14px; padding: 1.5rem 2rem; box-shadow: 0 2px 10px rgba(0,0,0,.07); margin-bottom: 2rem; }
+        .periodo-card h3 { font-size: 1rem; font-weight: 700; color: var(--azul); margin-bottom: 1rem; }
+        .periodo-form { display: flex; gap: 1rem; align-items: flex-end; flex-wrap: wrap; }
+        .periodo-group { display: flex; flex-direction: column; gap: .4rem; }
+        .periodo-group label { font-size: .83rem; font-weight: 600; color: #374151; }
+        .periodo-group input { padding: .6rem .9rem; border: 1.5px solid #d1d5db; border-radius: 9px; font-family: 'Poppins', sans-serif; font-size: .88rem; }
+        .periodo-group input:focus { outline: none; border-color: var(--nom); }
+        .btn-calcular { background: var(--nom); color: white; border: none; padding: .65rem 1.5rem; border-radius: 9px; font-family: 'Poppins', sans-serif; font-size: .88rem; font-weight: 700; cursor: pointer; }
+        .btn-calcular:hover { background: #2563eb; }
+
+        .alert-error { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; border-radius: 8px; padding: .9rem 1.2rem; margin-bottom: 1.5rem; }
+
+        /* Colilla */
+        .colilla-wrapper { max-width: 720px; }
+        .colilla { background: white; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,.1); overflow: hidden; }
+
+        .colilla-header { background: var(--azul); padding: 1.8rem 2rem; color: white; }
+        .colilla-header .empresa { font-size: .82rem; opacity: .7; text-transform: uppercase; letter-spacing: .06em; }
+        .colilla-header h2 { font-size: 1.3rem; font-weight: 800; margin: .3rem 0 .5rem; }
+        .colilla-header .periodo { font-size: .88rem; opacity: .8; }
+        .colilla-header .emp-info { display: flex; gap: 2rem; margin-top: 1rem; flex-wrap: wrap; }
+        .colilla-header .emp-info .item .lbl { font-size: .72rem; opacity: .65; }
+        .colilla-header .emp-info .item .val { font-size: .88rem; font-weight: 600; }
+
+        .colilla-body { padding: 1.5rem 2rem; }
+
+        /* Sección ingresos */
+        .seccion { margin-bottom: 1.2rem; }
+        .seccion-titulo { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: #9ca3af; padding-bottom: .5rem; border-bottom: 1px solid #f0f0f0; margin-bottom: .6rem; }
+        .linea { display: flex; justify-content: space-between; align-items: center; padding: .45rem 0; font-size: .88rem; }
+        .linea .concepto { color: #374151; }
+        .linea .monto { font-weight: 600; color: var(--azul); }
+        .linea .monto.deduccion { color: #dc2626; }
+        .linea .badge-tipo { font-size: .7rem; background: #dbeafe; color: #1d4ed8; padding: .15rem .5rem; border-radius: 4px; font-weight: 700; margin-left: .5rem; }
+        .linea-aux { background: #fef9c3; border-radius: 6px; padding: .45rem .7rem; margin: .3rem 0; }
+
+        /* Tabla horas extras */
+        .extras-tabla { width: 100%; border-collapse: collapse; font-size: .83rem; margin: .5rem 0; }
+        .extras-tabla th { background: #f8fafc; color: #6b7280; font-weight: 600; font-size: .75rem; padding: .5rem .7rem; text-align: left; }
+        .extras-tabla td { padding: .45rem .7rem; border-bottom: 1px solid #f0f0f0; color: #374151; }
+        .extras-tabla tr:last-child td { border-bottom: none; }
+
+        /* Total */
+        .colilla-total { background: #f0fdf4; border-top: 2px solid #bbf7d0; padding: 1.2rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+        .colilla-total .lbl { font-size: 1rem; font-weight: 700; color: var(--azul); }
+        .colilla-total .val { font-size: 1.8rem; font-weight: 800; color: var(--verde); }
+
+        /* Acciones */
+        .colilla-actions { padding: 1.2rem 2rem; background: #f8fafc; border-top: 1px solid #f0f0f0; display: flex; gap: 1rem; justify-content: flex-end; }
+        .btn-confirmar { background: var(--verde); color: white; border: none; padding: .75rem 2rem; border-radius: 9px; font-family: 'Poppins', sans-serif; font-size: .9rem; font-weight: 700; cursor: pointer; }
+        .btn-confirmar:hover { background: #15803d; }
+        .btn-volver { background: white; color: #6b7280; border: 1.5px solid #d1d5db; padding: .75rem 1.5rem; border-radius: 9px; font-family: 'Poppins', sans-serif; font-size: .9rem; font-weight: 600; text-decoration: none; display: flex; align-items: center; }
+
+        .nota-legal { font-size: .75rem; color: #9ca3af; text-align: center; padding: .8rem 2rem 1rem; }
+
+        footer { background: var(--azul); color: rgba(255,255,255,.6); text-align: center; padding: 1rem; font-size: .8rem; }
+    </style>
+</head>
+<body>
+<nav>
+    <a th:href="@{/nomina/dashboard}" class="nav-logo">Nominet</a>
+    <div style="display:flex;align-items:center;gap:1.5rem;">
+        <span class="badge-rol">Nómina</span>
+        <a th:href="@{/logout}" class="btn-logout">Cerrar sesión</a>
+    </div>
+</nav>
+<div class="layout">
+    <aside>
+        <ul class="sidebar-menu">
+            <li><a th:href="@{/nomina/dashboard}"><span>🏠</span> Dashboard</a></li>
+        </ul>
+        <div class="sidebar-section">Empleados</div>
+        <ul class="sidebar-menu">
+            <li><a th:href="@{/nomina/empleados}" class="active"><span>👥</span> Empleados</a></li>
+        </ul>
+        <div class="sidebar-section">Mis datos</div>
+        <ul class="sidebar-menu">
+            <li><a th:href="@{/nomina/mis-datos}"><span>👤</span> Mis datos</a></li>
+        </ul>
+    </aside>
+
+    <main>
+        <!-- Selector de período -->
+        <div class="periodo-card">
+            <h3>📄 Generar colilla de pago — <span th:text="${empleado.nombre}">Empleado</span></h3>
+            <form th:action="@{/nomina/colilla/preview/{id}(id=${empleado.idempleados})}" method="get">
+                <div class="periodo-form">
+                    <div class="periodo-group">
+                        <label>Período inicio</label>
+                        <input type="date" name="inicio" th:value="${inicio}" required>
+                    </div>
+                    <div class="periodo-group">
+                        <label>Período fin</label>
+                        <input type="date" name="fin" th:value="${fin}" required>
+                    </div>
+                    <button type="submit" class="btn-calcular">🔍 Calcular nómina</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Error (sin contrato) -->
+        <div th:if="${errorMsg}" class="alert-error">
+            ⚠️ <span th:text="${errorMsg}">Error</span>
+        </div>
+
+        <!-- Colilla preview -->
+        <div th:if="${resumen}" class="colilla-wrapper">
+            <div class="colilla">
+
+                <!-- Encabezado -->
+                <div class="colilla-header">
+                    <div class="empresa" th:text="${resumen.empleado.empresa.nombre}">Empresa</div>
+                    <h2>Colilla de Pago</h2>
+                    <div class="periodo">
+                        Período: <strong th:text="${#temporals.format(resumen.periodoInicio,'dd/MM/yyyy') + ' → ' + #temporals.format(resumen.periodoFin,'dd/MM/yyyy')}">-</strong>
+                    </div>
+                    <div class="emp-info">
+                        <div class="item">
+                            <div class="lbl">Empleado</div>
+                            <div class="val" th:text="${resumen.empleado.nombre}">-</div>
+                        </div>
+                        <div class="item">
+                            <div class="lbl">Cédula</div>
+                            <div class="val" th:text="${resumen.empleado.cedula}">-</div>
+                        </div>
+                        <div class="item">
+                            <div class="lbl">Cargo</div>
+                            <div class="val" th:text="${resumen.contrato.cargo}">-</div>
+                        </div>
+                        <div class="item">
+                            <div class="lbl">Tipo contrato</div>
+                            <div class="val" th:text="${resumen.contrato.tipocontrato}">-</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="colilla-body">
+
+                    <!-- INGRESOS -->
+                    <div class="seccion">
+                        <div class="seccion-titulo">Ingresos</div>
+                        <div class="linea">
+                            <span class="concepto">Salario básico mensual</span>
+                            <span class="monto">$<span th:text="${#numbers.formatDecimal(resumen.salarioBase,1,'POINT',0,'COMMA')}">0</span></span>
+                        </div>
+                        <div th:if="${resumen.aplicaAuxTransporte}" class="linea linea-aux">
+                            <span class="concepto">🚌 Auxilio de transporte <small>(salario ≤ 2 SMMLV)</small></span>
+                            <span class="monto">$<span th:text="${#numbers.formatDecimal(resumen.auxTransporte,1,'POINT',0,'COMMA')}">0</span></span>
+                        </div>
+                    </div>
+
+                    <!-- HORAS EXTRAS -->
+                    <div th:if="${not #lists.isEmpty(resumen.horasExtras)}" class="seccion">
+                        <div class="seccion-titulo">Horas extras del período</div>
+                        <table class="extras-tabla">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Tipo</th>
+                                    <th>Horas</th>
+                                    <th>Valor hora</th>
+                                    <th>Recargo</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="he : ${resumen.horasExtras}">
+                                    <td th:text="${#temporals.format(he.fecha,'dd/MM/yyyy')}">-</td>
+                                    <td>
+                                        <span th:switch="${he.tipo}">
+                                            <span th:case="'DIURNA'">Extra diurna</span>
+                                            <span th:case="'NOCTURNA'">Extra nocturna</span>
+                                            <span th:case="'DOMINICAL_DIURNA'">Dom. diurna</span>
+                                            <span th:case="'DOMINICAL_NOCTURNA'">Dom. nocturna</span>
+                                            <span th:case="*" th:text="${he.tipo}">-</span>
+                                        </span>
+                                    </td>
+                                    <td th:text="${he.horas}">0</td>
+                                    <td>$<span th:text="${#numbers.formatDecimal(he.valorPorHora,1,'POINT',0,'COMMA')}">0</span></td>
+                                    <td th:text="${(he.recargo != null ? he.recargo.multiply(new java.math.BigDecimal('100')).setScale(0,java.math.RoundingMode.HALF_UP) : 0) + '%'}">0%</td>
+                                    <td style="font-weight:700;">$<span th:text="${#numbers.formatDecimal(he.total,1,'POINT',0,'COMMA')}">0</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="linea" style="font-weight:700;border-top:1px solid #e5e7eb;padding-top:.6rem;">
+                            <span class="concepto">Total horas extras (<span th:text="${resumen.totalHorasExtras}">0</span> hrs)</span>
+                            <span class="monto">$<span th:text="${#numbers.formatDecimal(resumen.totalValorExtras,1,'POINT',0,'COMMA')}">0</span></span>
+                        </div>
+                    </div>
+
+                    <div th:if="${#lists.isEmpty(resumen.horasExtras)}" class="seccion">
+                        <div class="seccion-titulo">Horas extras del período</div>
+                        <div style="font-size:.85rem;color:#9ca3af;padding:.5rem 0;">Sin horas extras registradas en este período.</div>
+                    </div>
+
+                    <!-- DEDUCCIONES -->
+                    <div class="seccion">
+                        <div class="seccion-titulo">Deducciones obligatorias</div>
+                        <div class="linea">
+                            <span class="concepto">Salud empleado <span class="badge-tipo">4%</span></span>
+                            <span class="monto deduccion">- $<span th:text="${#numbers.formatDecimal(resumen.descSalud,1,'POINT',0,'COMMA')}">0</span></span>
+                        </div>
+                        <div class="linea">
+                            <span class="concepto">Pensión empleado <span class="badge-tipo">4%</span></span>
+                            <span class="monto deduccion">- $<span th:text="${#numbers.formatDecimal(resumen.descPension,1,'POINT',0,'COMMA')}">0</span></span>
+                        </div>
+                        <div th:if="${resumen.aplicaSolidaridad}" class="linea">
+                            <span class="concepto">Fondo solidaridad <span class="badge-tipo">1%</span> <small>(salario &gt; 4 SMMLV)</small></span>
+                            <span class="monto deduccion">- $<span th:text="${#numbers.formatDecimal(resumen.descSolidaridad,1,'POINT',0,'COMMA')}">0</span></span>
+                        </div>
+                        <div class="linea" style="font-weight:700;border-top:1px solid #e5e7eb;padding-top:.6rem;">
+                            <span class="concepto">Total deducciones</span>
+                            <span class="monto deduccion">- $<span th:text="${#numbers.formatDecimal(resumen.totalDeducciones,1,'POINT',0,'COMMA')}">0</span></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Total neto -->
+                <div class="colilla-total">
+                    <span class="lbl">💵 Neto a pagar</span>
+                    <span class="val">$<span th:text="${#numbers.formatDecimal(resumen.totalPagar,1,'POINT',0,'COMMA')}">0</span></span>
+                </div>
+
+                <!-- Botones confirmar -->
+                <div class="colilla-actions">
+                    <a th:href="@{/nomina/contratos/{id}(id=${empleado.idempleados})}" class="btn-volver">Cancelar</a>
+                    <form th:action="@{/nomina/colilla/guardar/{id}(id=${empleado.idempleados})}" method="post" style="display:inline;">
+                        <input type="hidden" name="inicio" th:value="${inicio}">
+                        <input type="hidden" name="fin" th:value="${fin}">
+                        <button type="submit" class="btn-confirmar"> Confirmar y guardar colilla</button>
+                    </form>
+                </div>
+
+                <div class="nota-legal">
+                    Liquidación conforme al Código Sustantivo del Trabajo (CST) colombiano. SMMLV 2025: $1.423.500 · Auxilio transporte: $202.612
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+<footer>&copy; 2025 Nominet · Sistema de Gestión de Nómina</footer>
+</body>
+</html>

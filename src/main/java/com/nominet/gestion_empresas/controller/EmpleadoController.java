@@ -24,16 +24,13 @@ public class EmpleadoController {
     // =========================
     @GetMapping
     public String listar(HttpSession session, Model model) {
-
         Empresa empresa = verificarSesion(session);
         if (empresa == null) return "redirect:/login";
 
         model.addAttribute("empleados",
                 empleadoService.listarPorEmpresa(empresa.getIdempresa()));
-
         model.addAttribute("empresa", empresa);
-
-        return "empleados/lista";
+        return "empleados/lista";   // → templates/empleados/lista.html
     }
 
     // =========================
@@ -41,18 +38,13 @@ public class EmpleadoController {
     // =========================
     @GetMapping("/nuevo")
     public String nuevoEmpleado(Model model, HttpSession session) {
+        Empresa empresa = verificarSesion(session);
+        if (empresa == null) return "redirect:/login";
 
-    Empresa empresa = verificarSesion(session);
-
-    if (empresa == null) {
-        return "redirect:/login";
-    }
-
-    model.addAttribute("empleado", new Empleado());
-    model.addAttribute("empresa", empresa);
-    model.addAttribute("modo", "crear");
-
-    return "empleados/formulario";
+        model.addAttribute("empleado", new Empleado());
+        model.addAttribute("empresa", empresa);
+        model.addAttribute("modo", "crear");
+        return "empleados/formulario";
     }
 
     // =========================
@@ -76,19 +68,23 @@ public class EmpleadoController {
         }
 
         if (empleadoService.existeCedula(empleado.getCedula())) {
-            result.rejectValue("cedula", "error.empleado",
-                    "Ya existe un empleado con esa cédula");
-
+            result.rejectValue("cedula", "error.empleado", "Ya existe un empleado con esa cédula");
             model.addAttribute("modo", "crear");
             model.addAttribute("empresa", empresa);
             return "empleados/formulario";
         }
 
         empleado.setEmpresa(empresa);
-        empleadoService.registrar(empleado, rol);
-
-        flash.addFlashAttribute("exito", "Empleado y usuario creados correctamente");
-        return "redirect:/dashboard";
+        try {
+            empleadoService.registrar(empleado, rol);
+            flash.addFlashAttribute("exito", "Empleado registrado correctamente");
+        } catch (RuntimeException e) {
+            result.rejectValue("correo", "error.empleado", e.getMessage());
+            model.addAttribute("modo", "crear");
+            model.addAttribute("empresa", empresa);
+            return "empleados/formulario";
+        }
+        return "redirect:/empleados";
     }
 
     // =========================
@@ -108,8 +104,7 @@ public class EmpleadoController {
         model.addAttribute("empleado", empleado);
         model.addAttribute("empresa", empresa);
         model.addAttribute("modo", "editar");
-
-        return "empleado/formulario";
+        return "empleados/formulario";   // CORREGIDO: antes era "empleado/formulario" (sin 's')
     }
 
     // =========================
@@ -129,18 +124,17 @@ public class EmpleadoController {
         if (result.hasErrors()) {
             model.addAttribute("modo", "editar");
             model.addAttribute("empresa", empresa);
-            return "empleado/formulario";
+            return "empleados/formulario";
         }
 
         empleado.setEmpresa(empresa);
         empleadoService.actualizar(id, empleado);
-
         flash.addFlashAttribute("exito", "Empleado actualizado correctamente");
         return "redirect:/empleados";
     }
 
     // =========================
-    // DESACTIVAR
+    // DESACTIVAR (soft-delete)
     // =========================
     @PostMapping("/desactivar/{id}")
     public String desactivar(@PathVariable Integer id,
@@ -151,8 +145,23 @@ public class EmpleadoController {
         if (empresa == null) return "redirect:/login";
 
         empleadoService.desactivar(id);
-
         flash.addFlashAttribute("exito", "Empleado desactivado");
+        return "redirect:/empleados";
+    }
+
+    // =========================
+    // REACTIVAR
+    // =========================
+    @PostMapping("/reactivar/{id}")
+    public String reactivar(@PathVariable Integer id,
+                            HttpSession session,
+                            RedirectAttributes flash) {
+
+        Empresa empresa = verificarSesion(session);
+        if (empresa == null) return "redirect:/login";
+
+        empleadoService.reactivar(id);
+        flash.addFlashAttribute("exito", "Empleado reactivado");
         return "redirect:/empleados";
     }
 

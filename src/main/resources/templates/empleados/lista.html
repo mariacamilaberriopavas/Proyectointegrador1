@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nominet – Empleados</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root { --verde: #16A34A; --azul: #1A2E40; --claro: #F3F4F6; }
+        body { font-family: 'Poppins', sans-serif; background: #f0f4f8; }
+
+        /* NAVBAR */
+        nav {
+            background: var(--azul); display: flex; align-items: center;
+            justify-content: space-between; padding: 0 2rem; height: 66px;
+            box-shadow: 0 2px 8px rgba(0,0,0,.3);
+        }
+        .nav-logo { font-size: 1.4rem; font-weight: 800; color: white; text-decoration: none; }
+        .nav-right { display: flex; align-items: center; gap: 1.5rem; }
+        .nav-empresa { color: rgba(255,255,255,.8); font-size: .88rem; }
+        .nav-empresa span { color: white; font-weight: 600; }
+        .btn-logout {
+            color: white; background: rgba(255,255,255,.15);
+            border: 1px solid rgba(255,255,255,.3);
+            padding: .4rem 1rem; border-radius: 6px;
+            text-decoration: none; font-size: .85rem; font-weight: 500;
+            transition: background .2s;
+        }
+        .btn-logout:hover { background: rgba(255,255,255,.25); }
+
+        /* LAYOUT */
+        .layout { display: flex; min-height: calc(100vh - 66px); }
+
+        /* SIDEBAR */
+        aside {
+            width: 230px; background: white;
+            box-shadow: 2px 0 8px rgba(0,0,0,.06);
+            padding: 1.5rem 0; flex-shrink: 0;
+        }
+        .sidebar-section { padding: .5rem 1.6rem; font-size: .72rem; font-weight: 700;
+            text-transform: uppercase; color: #9ca3af; letter-spacing: .06em; margin-top: .5rem; }
+        .sidebar-menu { list-style: none; }
+        .sidebar-menu li a {
+            display: flex; align-items: center; gap: .8rem;
+            padding: .75rem 1.6rem; color: #4b5563;
+            text-decoration: none; font-size: .9rem; font-weight: 500;
+            transition: background .2s, color .2s; border-left: 3px solid transparent;
+        }
+        .sidebar-menu li a:hover, .sidebar-menu li a.active {
+            background: #f0fdf4; color: var(--verde); border-left-color: var(--verde);
+        }
+        .sidebar-menu li a .icon { font-size: 1.1rem; }
+
+        /* MAIN */
+        main { flex: 1; padding: 2rem; }
+
+        .page-header {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 1.8rem;
+        }
+        .page-header h1 { font-size: 1.5rem; font-weight: 700; color: var(--azul); }
+        .page-header h1 span { color: var(--verde); }
+
+        .btn-nuevo {
+            background: var(--verde); color: white;
+            font-family: 'Poppins', sans-serif; font-size: .88rem; font-weight: 600;
+            padding: .6rem 1.3rem; border: none; border-radius: 8px;
+            text-decoration: none; transition: background .2s;
+        }
+        .btn-nuevo:hover { background: #15803d; }
+
+        /* ALERTAS */
+        .alert-exito {
+            background: #dcfce7; color: #166534; border: 1px solid #bbf7d0;
+            border-radius: 8px; padding: .8rem 1.2rem; margin-bottom: 1.5rem;
+            font-weight: 500; font-size: .9rem;
+        }
+        .alert-error {
+            background: #fee2e2; color: #991b1b; border: 1px solid #fecaca;
+            border-radius: 8px; padding: .8rem 1.2rem; margin-bottom: 1.5rem;
+            font-weight: 500; font-size: .9rem;
+        }
+
+        /* FILTROS */
+        .filtros {
+            display: flex; gap: 1rem; margin-bottom: 1.5rem; align-items: center;
+            flex-wrap: wrap;
+        }
+        .filtros select, .filtros input {
+            padding: .5rem .9rem; border: 1px solid #d1d5db; border-radius: 8px;
+            font-family: 'Poppins', sans-serif; font-size: .85rem; color: #374151;
+        }
+        .filtros label { font-size: .85rem; color: #6b7280; font-weight: 500; }
+
+        /* TABLA */
+        .tabla-wrapper {
+            background: white; border-radius: 16px;
+            box-shadow: 0 2px 12px rgba(0,0,0,.08); overflow: auto;
+        }
+        table { width: 100%; border-collapse: collapse; }
+        thead { background: var(--azul); }
+        thead th {
+            color: white; font-weight: 600; font-size: .82rem;
+            padding: 1rem 1.2rem; text-align: left; white-space: nowrap;
+        }
+        tbody tr { border-bottom: 1px solid #f0f0f0; transition: background .15s; }
+        tbody tr:last-child { border-bottom: none; }
+        tbody tr:hover { background: #f0fdf4; }
+        tbody td { padding: .85rem 1.2rem; font-size: .88rem; }
+
+        .badge {
+            display: inline-block; padding: .2rem .7rem; border-radius: 20px;
+            font-size: .72rem; font-weight: 700; text-transform: uppercase;
+        }
+        .badge-activo   { background: #dcfce7; color: #166534; }
+        .badge-inactivo { background: #fee2e2; color: #991b1b; }
+        .badge-NOMINA      { background: #dbeafe; color: #1e40af; }
+        .badge-TRABAJADOR  { background: #f3e8ff; color: #6b21a8; }
+
+        .acciones { display: flex; gap: .4rem; align-items: center; }
+        .btn-editar {
+            background: #f0fdf4; color: var(--verde); border: 1px solid #bbf7d0;
+            border-radius: 6px; padding: .3rem .85rem; font-size: .78rem; font-weight: 600;
+            text-decoration: none; white-space: nowrap;
+        }
+        .btn-editar:hover { background: #dcfce7; }
+        .btn-desactivar {
+            background: #fff7ed; color: #c2410c; border: 1px solid #fed7aa;
+            border-radius: 6px; padding: .3rem .85rem; font-size: .78rem; font-weight: 600;
+            cursor: pointer; font-family: 'Poppins', sans-serif; white-space: nowrap;
+        }
+        .btn-desactivar:hover { background: #ffedd5; }
+        .btn-reactivar {
+            background: #f0fdf4; color: var(--verde); border: 1px solid #bbf7d0;
+            border-radius: 6px; padding: .3rem .85rem; font-size: .78rem; font-weight: 600;
+            cursor: pointer; font-family: 'Poppins', sans-serif; white-space: nowrap;
+        }
+        .btn-reactivar:hover { background: #dcfce7; }
+
+        .vacio { text-align: center; padding: 3.5rem; color: #9ca3af; }
+        .vacio span { font-size: 2.5rem; display: block; margin-bottom: 1rem; }
+
+        .avatar {
+            width: 32px; height: 32px; border-radius: 50%;
+            background: var(--verde); color: white; font-weight: 700;
+            font-size: .85rem; display: flex; align-items: center;
+            justify-content: center; flex-shrink: 0;
+        }
+        .emp-info { display: flex; align-items: center; gap: .75rem; }
+
+        .rol-badge {
+            display: inline-block; padding: .15rem .55rem; border-radius: 5px;
+            font-size: .7rem; font-weight: 700; text-transform: uppercase;
+        }
+
+        footer { background: var(--azul); color: rgba(255,255,255,.6); text-align: center;
+            padding: 1rem; font-size: .8rem; }
+    </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav>
+    <a th:href="@{/dashboard}" class="nav-logo">Nominet</a>
+    <div class="nav-right">
+        <span class="nav-empresa">Empresa: <span th:text="${empresa.nombre}">Empresa</span></span>
+        <a th:href="@{/logout}" class="btn-logout">Cerrar sesión</a>
+    </div>
+</nav>
+
+<div class="layout">
+    <!-- SIDEBAR -->
+    <aside>
+        <ul class="sidebar-menu">
+            <li><a th:href="@{/dashboard}"><span class="icon">🏠</span> Dashboard</a></li>
+        </ul>
+        <div class="sidebar-section">Gestión</div>
+        <ul class="sidebar-menu">
+            <li><a th:href="@{/empleados}" class="active"><span class="icon">👥</span> Empleados</a></li>
+            <li><a th:href="@{/empleados/nuevo}"><span class="icon">➕</span> Nuevo empleado</a></li>
+        </ul>
+        <div class="sidebar-section">Empresa</div>
+        <ul class="sidebar-menu">
+            <li><a th:href="@{/empresas/editar/{id}(id=${empresa.idempresa})}"><span class="icon">🏢</span> Mi empresa</a></li>
+        </ul>
+    </aside>
+
+    <!-- MAIN -->
+    <main>
+        <div th:if="${exito}" class="alert-exito">✔ <span th:text="${exito}"></span></div>
+        <div th:if="${error}"  class="alert-error">✖ <span th:text="${error}"></span></div>
+
+        <div class="page-header">
+            <h1>Empleados <span th:text="'(' + ${empleados.size()} + ')'"></span></h1>
+            <a th:href="@{/empleados/nuevo}" class="btn-nuevo">+ Nuevo empleado</a>
+        </div>
+
+        <!-- Filtro visual (JS) -->
+        <div class="filtros">
+            <label>Filtrar estado:</label>
+            <select id="filtroEstado" onchange="filtrarTabla()">
+                <option value="">Todos</option>
+                <option value="activo">Activos</option>
+                <option value="inactivo">Inactivos</option>
+            </select>
+            <label>Filtrar rol:</label>
+            <select id="filtroRol" onchange="filtrarTabla()">
+                <option value="">Todos</option>
+                <option value="TRABAJADOR">Trabajador</option>
+                <option value="NOMINA">Nómina</option>
+            </select>
+            <input type="text" id="busqueda" placeholder="Buscar por nombre o cédula..." oninput="filtrarTabla()" style="min-width:220px;">
+        </div>
+
+        <div class="tabla-wrapper">
+            <table id="tablaEmpleados" th:if="${not #lists.isEmpty(empleados)}">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Empleado</th>
+                        <th>Cédula</th>
+                        <th>Correo</th>
+                        <th>Celular</th>
+                        <th>Rol</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="emp, s : ${empleados}"
+                        th:attr="data-estado=${emp.estado},
+                                 data-rol=${emp.usuario != null ? emp.usuario.rol : ''},
+                                 data-nombre=${emp.nombre},
+                                 data-cedula=${emp.cedula}">
+                        <td th:text="${s.count}">1</td>
+                        <td>
+                            <div class="emp-info">
+                                <div class="avatar" th:text="${emp.nombre.substring(0,1).toUpperCase()}">A</div>
+                                <span th:text="${emp.nombre}">Nombre</span>
+                            </div>
+                        </td>
+                        <td th:text="${emp.cedula}">12345</td>
+                        <td th:text="${emp.correo}">-</td>
+                        <td th:text="${emp.celular}">-</td>
+                        <td>
+                            <span th:if="${emp.usuario != null}"
+                                  th:class="'rol-badge badge-' + ${emp.usuario.rol}"
+                                  th:text="${emp.usuario.rol}">-</span>
+                            <span th:if="${emp.usuario == null}" style="color:#9ca3af;font-size:.8rem;">Sin usuario</span>
+                        </td>
+                        <td>
+                            <span th:class="'badge badge-' + ${emp.estado}"
+                                  th:text="${emp.estado}">activo</span>
+                        </td>
+                        <td>
+                            <div class="acciones">
+                                <a th:href="@{/empleados/editar/{id}(id=${emp.idempleados})}" class="btn-editar">✏️ Editar</a>
+
+                                <!-- Desactivar solo si está activo -->
+                                <form th:if="${emp.estado == 'activo'}"
+                                      th:action="@{/empleados/desactivar/{id}(id=${emp.idempleados})}"
+                                      method="post" style="display:inline">
+                                    <button type="submit" class="btn-desactivar"
+                                            onclick="return confirm('¿Desactivar este empleado?')">🔒 Desactivar</button>
+                                </form>
+
+                                <!-- Reactivar si está inactivo -->
+                                <form th:if="${emp.estado == 'inactivo'}"
+                                      th:action="@{/empleados/reactivar/{id}(id=${emp.idempleados})}"
+                                      method="post" style="display:inline">
+                                    <button type="submit" class="btn-reactivar"
+                                            onclick="return confirm('¿Reactivar este empleado?')">🔓 Reactivar</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div th:if="${#lists.isEmpty(empleados)}" class="vacio">
+                <span>👥</span>
+                Aún no hay empleados registrados.
+                <br><br>
+                <a th:href="@{/empleados/nuevo}" class="btn-nuevo">+ Crear primer empleado</a>
+            </div>
+        </div>
+    </main>
+</div>
+
+<footer>&copy; 2025 Nominet · Sistema de Gestión de Nómina</footer>
+
+<script>
+function filtrarTabla() {
+    const estado = document.getElementById('filtroEstado').value.toLowerCase();
+    const rol = document.getElementById('filtroRol').value.toLowerCase();
+    const busq = document.getElementById('busqueda').value.toLowerCase();
+    const filas = document.querySelectorAll('#tablaEmpleados tbody tr');
+    filas.forEach(fila => {
+        const est = (fila.dataset.estado || '').toLowerCase();
+        const r   = (fila.dataset.rol || '').toLowerCase();
+        const nom = (fila.dataset.nombre || '').toLowerCase();
+        const ced = (fila.dataset.cedula || '').toLowerCase();
+        const okEstado = !estado || est === estado;
+        const okRol    = !rol    || r === rol;
+        const okBusq   = !busq   || nom.includes(busq) || ced.includes(busq);
+        fila.style.display = (okEstado && okRol && okBusq) ? '' : 'none';
+    });
+}
+</script>
+</body>
+</html>
