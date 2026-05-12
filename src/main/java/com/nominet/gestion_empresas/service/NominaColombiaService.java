@@ -14,40 +14,40 @@ import java.util.List;
 /**
  * Liquidación de nómina según ley colombiana vigente 2025.
  *
- * SMMLV 2025: $1.423.500
- * Auxilio de transporte: $202.612 (para salarios <= 2 SMMLV)
+ * SMMLV 2026: $1.750.905 
+ * Auxilio de transporte: $249.095 (para salarios <= 2 SMMLV)
  *
  * DEDUCCIONES EMPLEADO:
  *   - Salud:     4% del salario base
  *   - Pensión:   4% del salario base
- *   - Fondo solidaridad: 1% si salario > 4 SMMLV ($5.694.000)
+ *   - Fondo solidaridad: 1% si salario > 4 SMMLV ($7.003.620)
  *
  * HORAS EXTRAS (recargo sobre valor hora ordinaria):
  *   - Diurna          (6am-9pm L-S):  +25%  → factor 1.25
  *   - Nocturna        (9pm-6am):       +75%  → factor 1.75
- *   - Dominical/fest. diurna:          +75%  → factor 1.75
- *   - Dominical/fest. nocturna:       +150%  → factor 2.50
+ *   - Dominical/fest. diurna:          +100%  → factor 2.
+ *   - Dominical/fest. nocturna:       +125%  → factor 2.25
  *
- * Valor hora ordinaria = salario mensual / 240
+ * Valor hora ordinaria = salario mensual / 210
  */
 @Service
 public class NominaColombiaService {
 
-    // ── Constantes 2025 ───────────────────────────────────
-    public static final BigDecimal SMMLV          = new BigDecimal("1423500");
-    public static final BigDecimal AUX_TRANSPORTE = new BigDecimal("202612");
+    // ── Constantes 2026 ───────────────────────────────────
+    public static final BigDecimal SMMLV          = new BigDecimal("1750905");
+    public static final BigDecimal AUX_TRANSPORTE = new BigDecimal("249095");
     public static final BigDecimal SALUD_PCT      = new BigDecimal("0.04");
     public static final BigDecimal PENSION_PCT    = new BigDecimal("0.04");
     public static final BigDecimal SOLIDARIDAD_PCT= new BigDecimal("0.01");
     public static final BigDecimal LIMITE_AUX     = SMMLV.multiply(new BigDecimal("2"));   // 2 SMMLV
     public static final BigDecimal LIMITE_SOLID   = SMMLV.multiply(new BigDecimal("4"));   // 4 SMMLV
-    public static final BigDecimal HORAS_MES      = new BigDecimal("240");
+    public static final BigDecimal HORAS_MES      = new BigDecimal("210");
 
     // Factores hora extra (1 + recargo)
     public static final BigDecimal FACTOR_ED  = new BigDecimal("1.25"); // extra diurna
     public static final BigDecimal FACTOR_EN  = new BigDecimal("1.75"); // extra nocturna
-    public static final BigDecimal FACTOR_DD  = new BigDecimal("1.75"); // dominical diurna
-    public static final BigDecimal FACTOR_DN  = new BigDecimal("2.50"); // dominical nocturna
+    public static final BigDecimal FACTOR_DD  = new BigDecimal("2.00"); // dominical diurna
+    public static final BigDecimal FACTOR_DN  = new BigDecimal("2.25"); // dominical nocturna
 
     @Autowired
     private HorasExtrasRepository horasExtrasRepository;
@@ -78,8 +78,8 @@ public class NominaColombiaService {
         if (tipo == null) return new BigDecimal("0.25");
         return switch (tipo.toUpperCase()) {
             case "NOCTURNA"          -> new BigDecimal("0.75");
-            case "DOMINICAL_DIURNA"  -> new BigDecimal("0.75");
-            case "DOMINICAL_NOCTURNA"-> new BigDecimal("1.50");
+            case "DOMINICAL_DIURNA"  -> new BigDecimal("2.00");
+            case "DOMINICAL_NOCTURNA"-> new BigDecimal("2.25");
             default                  -> new BigDecimal("0.25");
         };
     }
